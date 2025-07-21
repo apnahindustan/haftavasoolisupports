@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hafta Vasooli Support</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f8fc;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    /* Chat Container */
+    .chat-box {
+      background: #fff;
+      width: 400px;
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 600px;
+    }
+    .chat-header {
+      background: #075E54;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 20px;
+    }
+    .chat-body {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #ECE5DD;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .msg {
+      padding: 10px 16px;
+      border-radius: 20px;
+      max-width: 75%;
+      font-size: 14px;
+      word-wrap: break-word;
+      line-height: 1.3;
+      display: inline-block;
+    }
+    .user {
+      background-color: #DCF8C6;
+      align-self: flex-end;
+      border-bottom-right-radius: 5px;
+    }
+    .admin {
+      background-color: white;
+      align-self: flex-start;
+      border-bottom-left-radius: 5px;
+      box-shadow: 0 1px 0.5px rgba(0,0,0,0.1);
+    }
+    .chat-footer {
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      padding: 10px 15px;
+      gap: 10px;
+    }
+    .chat-footer input[type="text"] {
+      flex: 1;
+      border: none;
+      border-radius: 20px;
+      padding: 12px 15px;
+      font-size: 15px;
+      outline: none;
+      background: white;
+      box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.1);
+    }
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 22px;
+      color: #075E54;
+      user-select: none;
+      transition: color 0.2s;
+    }
+    .icon-btn:hover {
+      color: #128C7E;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    .quick-queries {
+      background: #f0f0f0;
+      padding: 10px 15px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      border-top: 1px solid #ddd;
+    }
+    .quick-queries button {
+      background: white;
+      border: 1px solid #128C7E;
+      color: #128C7E;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .quick-queries button:hover {
+      background-color: #128C7E;
+      color: white;
+    }
+    /* Modal for username input */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .modal {
+      background: white;
+      padding: 30px 25px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      width: 320px;
+      text-align: center;
+    }
+    .modal h2 {
+      margin-bottom: 20px;
+      color: #075E54;
+      font-weight: 600;
+    }
+    .modal input[type="text"] {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 16px;
+      border-radius: 25px;
+      border: 1px solid #ccc;
+      outline: none;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+    }
+    .modal input[type="text"]:focus {
+      border-color: #128C7E;
+    }
+    .modal button {
+      background: #128C7E;
+      border: none;
+      color: white;
+      font-size: 16px;
+      padding: 12px 25px;
+      border-radius: 25px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: 600;
+      transition: background-color 0.3s;
+    }
+    .modal button:hover {
+      background: #075E54;
+    }
+    img.chat-image {
+      max-width: 75%;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      display: block;
+      margin-top: 4px;
+    }
+    audio {
+      max-width: 75%;
+      border-radius: 10px;
+      outline: none;
+      margin-top: 4px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chat-box" aria-label="Chat box">
+    <div class="chat-header">💬 Hafta Vasooli Support</div>
+
+    <div class="chat-body" id="messages" aria-live="polite" aria-atomic="false"></div>
+
+    <div class="quick-queries" aria-label="Quick queries">
+      <button onclick="quickSend('Withdrawal Issue')">Withdrawal Issue</button>
+      <button onclick="quickSend('Deposit Issue')">Deposit Issue</button>
+      <button onclick="quickSend('Forgot User ID & Password')">Forgot User ID & Password</button>
+      <button onclick="quickSend('Other')">Other</button>
+    </div>
+
+    <div class="chat-footer" role="form">
+      <button class="icon-btn" id="uploadBtn" title="Send Image / Screenshot" aria-label="Upload Image">
+        <!-- WhatsApp style paperclip icon -->
+        <svg height="24" width="24" viewBox="0 0 24 24" fill="#075E54" xmlns="http://www.w3.org/2000/svg"><path d="M20.354 5.646a3 3 0 00-4.243 0L7.414 14.343a2 2 0 102.828 2.829l7.242-7.242a1 1 0 00-1.415-1.415L8.828 15.757a.5.5 0 11-.707-.707l7.242-7.242a3 3 0 014.243 4.243l-7.778 7.778a4 4 0 01-5.657-5.657l8.486-8.486a5 5 0 017.071 7.071l-8.485 8.485a6 6 0 01-8.486-8.485l8.486-8.485a7 7 0 019.899 9.899l-8.485 8.486a8 8 0 01-11.314-11.314l7.778-7.778a.5.5 0 11.707.707l-7.778 7.778a6 6 0 008.485 8.485l8.485-8.486a5 5 0 00-7.07-7.07z"/></svg>
+      </button>
+      <input type="file" id="fileInput" accept="image/*" aria-label="Upload image" />
+
+      <button class="icon-btn" id="voiceBtn" title="Send Voice Message" aria-label="Record Voice Message">
+        <!-- WhatsApp style microphone icon -->
+        <svg height="24" width="24" viewBox="0 0 24 24" fill="#075E54" xmlns="http://www.w3.org/2000/svg"><path d="M12 14a3 3 0 003-3V6a3 3 0 10-6 0v5a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 0014 0h-2zM12 19v3m-4-3h8" stroke="#075E54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+
+      <input id="msgInput" type="text" placeholder="अपना संदेश लिखें..." aria-label="Type your message" />
+      <button id="sendBtn" class="icon-btn" title="Send Message" aria-label="Send message">
+        <!-- WhatsApp style send icon -->
+        <svg height="24" width="24" viewBox="0 0 24 24" fill="#075E54" xmlns="http://www.w3.org/2000/svg"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Username modal -->
+  <div id="usernameModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle" style="display:none;">
+    <div class="modal">
+      <h2 id="modalTitle">अपना नाम दर्ज करें</h2>
+      <input type="text" id="usernameInput" placeholder="अपना नाम यहाँ लिखें" aria-required="true" />
+      <button id="usernameSubmitBtn">चैट शुरू करें</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getDatabase, ref, onChildAdded, push, get, child } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAF_EYwwLxYo0Y1kOpmHc5yhx2msec6ung",
+      authDomain: "haftavasooli-4f551.firebaseapp.com",
+      databaseURL: "https://haftavasooli-4f551-default-rtdb.firebaseio.com",
+      projectId: "haftavasooli-4f551",
+      storageBucket: "haftavasooli-4f551.appspot.com",
+      messagingSenderId: "987551935980",
+      appId: "1:987551935980:web:866f596370861a5bd4a4c9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
+
+    const messagesDiv = document.getElementById('messages');
+    const input = document.getElementById('msgInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const voiceBtn = document.getElementById('voiceBtn');
+
+    const usernameModal = document.getElementById('usernameModal');
+    const usernameInput = document.getElementById('usernameInput');
+    const usernameSubmitBtn = document.getElementById('usernameSubmitBtn');
+
+    let username = null;
+    let userId = null;
+    let mediaRecorder;
+    let audioChunks = [];
+
+    // Show username modal on page load
+    window.onload = () => {
+      usernameModal.style.display = 'flex';
+      usernameInput.focus();
+    };
+
+    usernameSubmitBtn.onclick = () => {
+      const name = usernameInput.value.trim();
+      if (!name) {
+        alert("कृपया अपना नाम दर्ज करें");
+        usernameInput.focus();
+        return;
+      }
+      username = name;
+      userId = username.replace(/\s+/g, '_').toLowerCase(); // simple id for db
+      usernameModal.style.display = 'none';
+      initChat();
+    };
+
+    usernameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') usernameSubmitBtn.click();
+    });
+
+    function initChat() {
+      const chatRef = ref(db, 'chats/' + userId);
+
+      // Check if welcome message sent already
+      get(child(chatRef, 'welcome_sent')).then((snapshot) => {
+        if (!snapshot.exists()) {
+          // Send welcome message once
+          push(chatRef, {
+            sender: 'admin',
+            message: `Hey, Greetings from HAFTA VASOOLI.Thank you for your message.\nPlease explain your problem\nनमस्कार, कृपा अपनी प्रॉब्लम बताएं। हम जल्द ही समाधान करेंगे!`,
+            timestamp: Date.now(),
+            type: 'text'
+          });
+          // Mark welcome sent
+          push(chatRef, {
+            sender: 'admin',
+            message: '__welcome_sent__',
+            timestamp: Date.now(),
+            type: 'meta'
+          });
+        }
+      });
+
+      // Listen to chat messages
+      onChildAdded(chatRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+        if (data.type === 'meta' && data.message === '__welcome_sent__') return; // ignore meta messages
+
+        const div = document.createElement('div');
+        div.classList.add('msg');
+        if (data.sender === 'admin') div.classList.add('admin');
+        else div.classList.add('user');
+
+        if(data.type === 'image'){
+          const img = document.createElement('img');
+          img.src = data.message;
+          img.alt = "User Image";
+          img.className = "chat-image";
+          img.onclick = () => window.open(data.message, '_blank');
+          div.appendChild(img);
+        } else if(data.type === 'audio'){
+          const audio = document.createElement('audio');
+          audio.controls = true;
+          audio.src = data.message;
+          div.appendChild(audio);
+        } else {
+          div.textContent = (data.sender === 'admin' ? "Admin: " : username + ": ") + data.message;
+        }
+        messagesDiv.appendChild(div);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      });
+    }
+
+    // Send text message
+    sendBtn.onclick = () => {
+      const text = input.value.trim();
+      if (!text) return;
+      sendMessage(text, 'text');
+      input.value = '';
+    };
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendBtn.click();
+    });
+
+    // Quick queries send
+    window.quickSend = (query) => {
+      sendMessage(query, 'text');
+    };
+
+    async function sendMessage(content, type='text') {
+      if (!content) return;
+      if (!userId) return alert("User not initialized");
+
+      const chatRef = ref(db, 'chats/' + userId);
+      await push(chatRef, {
+        sender: 'user',
+        message: content,
+        timestamp: Date.now(),
+        type
+      });
+    }
+
+    // File upload button click triggers hidden input
+    uploadBtn.onclick = () => {
+      fileInput.click();
+    };
+
+    fileInput.onchange = async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      const filePath = 'chat_media/' + userId + '/' + Date.now() + '_' + file.name;
+      const storageReference = storageRef(storage, filePath);
+      await uploadBytes(storageReference, file);
+      const downloadURL = await getDownloadURL(storageReference);
+      await sendMessage(downloadURL, 'image');
+      fileInput.value = null;
+    };
+
+    // Voice recording logic with WhatsApp mic icon toggling
+    voiceBtn.onclick = () => {
+      if (!mediaRecorder || mediaRecorder.state === "inactive") {
+        startRecording();
+      } else if (mediaRecorder.state === "recording") {
+        stopRecording();
+      }
+    };
+
+    async function startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+        voiceBtn.style.color = '#25D366'; // green color to indicate recording
+        audioChunks = [];
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const filePath = 'chat_media/' + userId + '/' + Date.now() + '_voice.webm';
+          const storageReference = storageRef(storage, filePath);
+          await uploadBytes(storageReference, audioBlob);
+          const downloadURL = await getDownloadURL(storageReference);
+          await sendMessage(downloadURL, 'audio');
+          voiceBtn.style.color = '#075E54'; // back to default
+        };
+      } catch (err) {
+        alert("Microphone access denied or not available.");
+      }
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+      }
+    }
+  </script>
+
+</body>
+</html>
